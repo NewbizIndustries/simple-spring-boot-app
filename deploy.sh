@@ -1,9 +1,12 @@
 #!/bin/bash
 
+IMAGE=newbiz-spring-boot-docker
+
 mvn package docker:build
 
-if [ `docker ps | wc -l` -gt 1 ]; then
-	docker stop `docker ps | tail -1 | awk '{print $12}'`
+docker inspect $IMAGE > /dev/null 2>&1
+if [ $? == 0 ]; then
+	docker rm -f $IMAGE
 fi
 
-docker run -p 8080:8080 -t newbiz/spring-boot-docker
+docker run --name $IMAGE -p 8080:8080 -t newbizindustries/simple-spring-boot-app
