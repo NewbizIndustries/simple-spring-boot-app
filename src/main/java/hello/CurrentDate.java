@@ -11,17 +11,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "currentDate")
 public class CurrentDate {
-	private final Date date = new Date();
-	private final DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-	private final DateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+	private static final DateFormat TIME_FORMAT = new SimpleDateFormat("hh:mm:ss");
+
+	private String date;
+	private String time;
+
+	public CurrentDate() {
+		final Date currentDate = new Date();
+		date=DATE_FORMAT.format(currentDate);
+		time=TIME_FORMAT.format(currentDate);
+	}
 
 	@XmlElement
 	public String getDate() {
-		return dateFormat.format(date);
+		return date;
 	}
 
 	@XmlElement
 	public String getTime() {
-		return timeFormat.format(date);
+		return time;
 	}
 }
