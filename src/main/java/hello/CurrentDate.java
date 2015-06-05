@@ -14,8 +14,8 @@ public class CurrentDate {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
 	private static final DateFormat TIME_FORMAT = new SimpleDateFormat("hh:mm:ss");
 
-	private String date;
-	private String time;
+	private final String date;
+	private final String time;
 
 	public CurrentDate() {
 		final Date currentDate = new Date();
