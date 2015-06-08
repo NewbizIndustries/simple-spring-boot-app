@@ -1,5 +1,8 @@
 package hello;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,14 +33,19 @@ public class Application {
 		try {
 			responseEntity = restTemplate.getForEntity(urlOfTimeApi(), CurrentDate.class);
 		} catch (RestClientException | IllegalArgumentException e) {
-			return "Fehler beim Zugriff auf Time API";
+			return "Fehler beim Zugriff auf Time API: " + e.getMessage();
 		}
 		if (responseEntity.getStatusCode() != OK) {
 			return "Die Time API konnte die Anfrage nicht korrekt bearbeiten.";
 		}
 
 		final CurrentDate currentDate = responseEntity.getBody();
-		return String.format("Heute haben wir den %s. Aktuelle Uhrzeit: %s.", currentDate.getDate(), currentDate.getTime());
+		final String timeMessage = String.format("Heute haben wir den %s. Aktuelle Uhrzeit: %s.<br>\n",
+			currentDate.getDate(), currentDate.getTime());
+		final String serverMessage = String.format("fe server: %s; time server: %s", getHostname(),
+			currentDate.getOrigin());
+
+		return timeMessage + serverMessage;
 	}
 
 	@RequestMapping(value = "/time", produces = "application/json")
@@ -59,6 +67,14 @@ public class Application {
 			return environment.getProperty(PROPERTY_TIME_API);
 		} else {
 			return DEFAULT_TIME_API_URL;
+		}
+	}
+
+	public static String getHostname() {
+		try {
+			return InetAddress.getLocalHost().getHostName();
+		} catch (UnknownHostException e) {
+			return "unknown";
 		}
 	}
 }

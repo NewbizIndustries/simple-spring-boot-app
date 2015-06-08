@@ -16,11 +16,13 @@ public class CurrentDate {
 
 	private final String date;
 	private final String time;
+	private final String origin;
 
 	public CurrentDate() {
 		final Date currentDate = new Date();
-		date=DATE_FORMAT.format(currentDate);
-		time=TIME_FORMAT.format(currentDate);
+		date = DATE_FORMAT.format(currentDate);
+		time = TIME_FORMAT.format(currentDate);
+		origin = Application.getHostname();
 	}
 
 	@XmlElement
@@ -31,5 +33,10 @@ public class CurrentDate {
 	@XmlElement
 	public String getTime() {
 		return time;
+	}
+
+	@XmlElement
+	public String getOrigin() {
+		return origin;
 	}
 }
