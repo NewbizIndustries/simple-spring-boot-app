@@ -3,6 +3,9 @@ package hello;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +22,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @SpringBootApplication
 public class Application {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
 	private static final String PROPERTY_TIME_API = "time.api";
 	private static final String DEFAULT_TIME_API_URL = "http://localhost:8080/time";
 
@@ -29,6 +33,8 @@ public class Application {
 
 	@RequestMapping("/")
 	public String home() {
+		LOGGER.info("resource / requested");
+
 		final ResponseEntity<CurrentDate> responseEntity;
 		try {
 			responseEntity = restTemplate.getForEntity(urlOfTimeApi(), CurrentDate.class);
@@ -50,11 +56,13 @@ public class Application {
 
 	@RequestMapping(value = "/time", produces = "application/json")
 	public ResponseEntity<CurrentDate> timestamp() {
+		LOGGER.info("resource /time requested");
 		return new ResponseEntity<>(new CurrentDate(), OK);
 	}
 
 	@RequestMapping("/health")
 	public ResponseEntity<String> health() {
+		LOGGER.info("resource /health requested");
 		return new ResponseEntity<>("I'm fine.", OK);
 	}
 
@@ -63,11 +71,14 @@ public class Application {
 	}
 
 	private String urlOfTimeApi() {
+		final String timeApiUrl;
 		if (environment.containsProperty(PROPERTY_TIME_API)) {
-			return environment.getProperty(PROPERTY_TIME_API);
+			timeApiUrl = environment.getProperty(PROPERTY_TIME_API);
 		} else {
-			return DEFAULT_TIME_API_URL;
+			timeApiUrl = DEFAULT_TIME_API_URL;
 		}
+		LOGGER.info("using time API at: " + timeApiUrl);
+		return timeApiUrl;
 	}
 
 	public static String getHostname() {
