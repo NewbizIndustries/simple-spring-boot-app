@@ -1,5 +1,7 @@
 package hello;
 
+import http.HttpClientRequestFactoryBuilder;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -29,7 +31,7 @@ public class Application {
 	@Autowired
 	private Environment environment;
 
-	private final RestTemplate restTemplate = new RestTemplate();
+	private final RestTemplate restTemplate = new RestTemplate(new HttpClientRequestFactoryBuilder().buildUnsafe());
 
 	@RequestMapping("/")
 	public String home() {
