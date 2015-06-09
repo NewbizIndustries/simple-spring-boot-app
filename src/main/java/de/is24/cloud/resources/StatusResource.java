@@ -26,6 +26,7 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 public class StatusResource {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StatusResource.class);
+	public static final String PROPERTY_IMAGE_VERSION = "IMAGE_VERSION";
 
 	@Autowired
 	private ConfigurableEnvironment environment;
@@ -39,6 +40,15 @@ public class StatusResource {
 	public ResponseEntity<String> health() {
 		LOGGER.info("resource /health requested");
 		return new ResponseEntity<>("I'm fine.", OK);
+	}
+
+	@RequestMapping("/image")
+	public ResponseEntity<String> imageVersion() {
+		LOGGER.info("resource /image requested");
+		if (environment.containsProperty(PROPERTY_IMAGE_VERSION)) {
+			return new ResponseEntity<>(environment.getProperty(PROPERTY_IMAGE_VERSION), OK);
+		}
+		return new ResponseEntity<>("image version unknown", OK);
 	}
 
 	@RequestMapping("/hostinfo")
