@@ -1,4 +1,4 @@
-package hello;
+package de.is24.cloud.domain;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -7,6 +7,8 @@ import java.util.Date;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+
+import static de.is24.cloud.utils.HostUtils.getHostname;
 
 
 @XmlRootElement(name = "currentDate")
@@ -22,7 +24,7 @@ public class CurrentDate {
 		final Date currentDate = new Date();
 		date = DATE_FORMAT.format(currentDate);
 		time = TIME_FORMAT.format(currentDate);
-		origin = Application.getHostname();
+		origin = getHostname();
 	}
 
 	@XmlElement

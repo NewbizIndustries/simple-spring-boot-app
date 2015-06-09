@@ -1,4 +1,4 @@
-package http;
+package de.is24.cloud.utils.http;
 
 import java.net.Proxy;
 
