@@ -1,5 +1,7 @@
 package de.is24.cloud.utils.http;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 
 import java.net.HttpURLConnection;
@@ -12,15 +14,11 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 
-public class UnsafeSimpleClientHttpRequestFactory extends SimpleClientHttpRequestFactory {
-	private static final Logger LOGGER = LoggerFactory.getLogger(UnsafeSimpleClientHttpRequestFactory.class);
-
+@Slf4j
+class UnsafeSimpleClientHttpRequestFactory extends SimpleClientHttpRequestFactory {
 	@Override
 	protected void prepareConnection(final HttpURLConnection connection, final String httpMethod) throws IOException {
 		if (connection instanceof HttpsURLConnection) {
@@ -28,7 +26,7 @@ public class UnsafeSimpleClientHttpRequestFactory extends SimpleClientHttpReques
 				((HttpsURLConnection) connection).setHostnameVerifier((s, sslSession) -> true);
 				((HttpsURLConnection) connection).setSSLSocketFactory(initUnsafeSslContext().getSocketFactory());
 			} catch (KeyManagementException | NoSuchAlgorithmException e) {
-				LOGGER.error("can't prepare connection", e);
+				log.error("can't prepare connection", e);
 			}
 		}
 		super.prepareConnection(connection, httpMethod);

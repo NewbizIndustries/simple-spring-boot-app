@@ -1,7 +1,6 @@
 package de.is24.cloud.resources;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -21,11 +20,8 @@ import static de.is24.cloud.utils.HostUtils.getHostname;
 
 
 @RestController
+@Slf4j
 public class TimeResource {
-	private static final Logger LOGGER = LoggerFactory.getLogger(TimeResource.class);
-	private static final String PROPERTY_TIME_API = "TIMEAPI";
-	private static final String DEFAULT_TIME_API_URL = "http://localhost:8080/time";
-
 	@Autowired
 	private ConfigService configService;
 
@@ -36,7 +32,7 @@ public class TimeResource {
 
 	@RequestMapping("/")
 	public String home() {
-		LOGGER.info("resource / requested");
+		log.info("resource / requested");
 
 		final ResponseEntity<CurrentDate> responseEntity;
 		try {
@@ -59,18 +55,7 @@ public class TimeResource {
 
 	@RequestMapping(value = "/time", produces = "application/json")
 	public ResponseEntity<CurrentDate> timestamp() {
-		LOGGER.info("resource /time requested");
+		log.info("resource /time requested");
 		return new ResponseEntity<>(new CurrentDate(), OK);
-	}
-
-	private String urlOfTimeApi() {
-		final String timeApiUrl;
-		if (environment.containsProperty(PROPERTY_TIME_API)) {
-			timeApiUrl = environment.getProperty(PROPERTY_TIME_API);
-		} else {
-			timeApiUrl = DEFAULT_TIME_API_URL;
-		}
-		LOGGER.info("using time API at: " + timeApiUrl);
-		return timeApiUrl;
 	}
 }

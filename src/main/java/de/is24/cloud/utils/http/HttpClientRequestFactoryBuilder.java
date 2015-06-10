@@ -1,19 +1,17 @@
 package de.is24.cloud.utils.http;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.Proxy;
 
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 
+@Slf4j
 public class HttpClientRequestFactoryBuilder {
-	private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientRequestFactoryBuilder.class);
-
 	private Integer timeout = 0;
 	private Optional<Proxy> proxy = Optional.empty();
 
@@ -39,10 +37,10 @@ public class HttpClientRequestFactoryBuilder {
 		clientHttpRequestFactory.setConnectTimeout(timeout);
 		clientHttpRequestFactory.setReadTimeout(timeout);
 		if (proxy.isPresent()) {
-			LOGGER.info("using proxy server: {}", proxy.get().address());
+			log.info("using proxy server: {}", proxy.get().address());
 			clientHttpRequestFactory.setProxy(proxy.get());
 		} else {
-			LOGGER.info("no proxy server configured");
+			log.info("no proxy server configured");
 		}
 		return clientHttpRequestFactory;
 	}

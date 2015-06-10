@@ -1,65 +1,88 @@
 package de.is24.cloud.resources;
 
+import com.amazonaws.regions.Regions;
+
+import lombok.extern.slf4j.Slf4j;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.CompositePropertySource;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.amazonaws.regions.ServiceAbbreviations.Dynamodb;
+
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.OK;
 
+import static de.is24.cloud.configuration.AppEnvironment.getImageVersion;
+import static de.is24.cloud.configuration.AppEnvironment.getStackVersion;
+
 
 @RestController
+@Slf4j
 public class StatusResource {
-	private static final Logger LOGGER = LoggerFactory.getLogger(StatusResource.class);
-	public static final String PROPERTY_IMAGE_VERSION = "IMAGE_VERSION";
+	@Autowired
+	private Environment environment;
 
 	@Autowired
-	private ConfigurableEnvironment environment;
+	private ConfigurableEnvironment configurableEnvironment;
 
 	@RequestMapping("/env")
 	public ResponseEntity<String> environment() {
-		return new ResponseEntity<>(getAllProperties(environment).toString(), OK);
+		return new ResponseEntity<>(getAllProperties(configurableEnvironment).toString(), OK);
 	}
 
 	@RequestMapping("/health")
 	public ResponseEntity<String> health() {
-		LOGGER.info("resource /health requested");
+		log.info("resource /health requested");
 		return new ResponseEntity<>("I'm fine.", OK);
 	}
 
 	@RequestMapping("/image")
 	public ResponseEntity<String> imageVersion() {
-		LOGGER.info("resource /image requested");
-		if (environment.containsProperty(PROPERTY_IMAGE_VERSION)) {
-			return new ResponseEntity<>(environment.getProperty(PROPERTY_IMAGE_VERSION), OK);
+		log.info("resource /image requested");
+
+		final Optional<String> imageVersion = getImageVersion(environment);
+		if (imageVersion.isPresent()) {
+			return new ResponseEntity<>(configurableEnvironment.getProperty(imageVersion.get()), OK);
 		}
-		return new ResponseEntity<>("image version unknown", OK);
+		return new ResponseEntity<>("unknown image version", OK);
 	}
 
-	@RequestMapping("/hostinfo")
+	@RequestMapping("/stack")
+	public ResponseEntity<String> stackVersion() {
+		log.info("resource /stack requested");
+
+		final Optional<String> stackVersion = getStackVersion(environment);
+		if (stackVersion.isPresent()) {
+			return new ResponseEntity<>(configurableEnvironment.getProperty(stackVersion.get()), OK);
+		}
+		return new ResponseEntity<>("unknown stack version", OK);
+	}
+
+	@RequestMapping("/host")
 	public ResponseEntity<String> hostinfo() {
-		LOGGER.info("resource /hostinfo requested");
+		log.info("resource /host requested");
 
 		final StringBuilder sb = new StringBuilder();
 		try {
 			sb.append(String.format("hostName: %s\n", InetAddress.getLocalHost().getHostName()));
 			sb.append(String.format("canonicalHostName: %s\n", InetAddress.getLocalHost().getCanonicalHostName()));
 			sb.append(String.format("hostAddress: %s\n", InetAddress.getLocalHost().getHostAddress()));
+			sb.append(String.format("serviceEndpoint: %s\n", serviceEndpoint()));
 		} catch (UnknownHostException e) {
 			return new ResponseEntity<>("UnknownHostException occurred", INTERNAL_SERVER_ERROR);
 		}
@@ -97,6 +120,14 @@ public class StatusResource {
 				continue;
 			}
 			aBase.put(entry.getKey(), entry.getValue());
+		}
+	}
+
+	private String serviceEndpoint() {
+		try {
+			return Regions.getCurrentRegion().getServiceEndpoint(Dynamodb);
+		} catch (NullPointerException e) {
+			return "no service endpoint found";
 		}
 	}
 }
