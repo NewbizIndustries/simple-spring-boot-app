@@ -1,4 +1,4 @@
-FROM java:8
+FROM java:openjdk-8-jre
 VOLUME /tmp
 ADD simple-spring-boot-app-1-SNAPSHOT.jar app.jar
 RUN bash -c 'touch /app.jar'
